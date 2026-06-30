@@ -1,0 +1,419 @@
+[
+  {
+    "case_id": "c01_unsalted_sha256",
+    "category": "fast_hash_footgun",
+    "fake_record": "example_user",
+    "context": "fast_hash_footgun",
+    "secret_label": "toy_secret_1",
+    "secret_bytes_len": 12,
+    "salt_bytes_len": 0,
+    "algorithm": "sha256",
+    "cost_param": null,
+    "expected_success": false,
+    "expected_digest_obs": "unsalted_fast_hash_footgun",
+    "naive_should_fail": true
+  },
+  {
+    "case_id": "c02_repeated_fast_hash",
+    "category": "fast_hash_footgun",
+    "fake_record": "demo_account",
+    "context": "fast_hash_footgun",
+    "secret_label": "toy_secret_1",
+    "secret_bytes_len": 12,
+    "salt_bytes_len": 0,
+    "algorithm": "sha256",
+    "expected_digest_obs": "same_input_same_output",
+    "naive_should_fail": true
+  },
+  {
+    "case_id": "c03_pbkdf2_unique_salt",
+    "category": "salt_policy",
+    "fake_record": "synthetic_password_case",
+    "context": "salt_policy",
+    "secret_label": "toy_secret_1",
+    "secret_bytes_len": 12,
+    "salt_bytes_len": 16,
+    "algorithm": "pbkdf2_hmac",
+    "hash_name": "sha256",
+    "cost_param": 100000,
+    "expected_digest_obs": "unique_salt_different_output",
+    "expected_salt_obs": "salt_unique"
+  },
+  {
+    "case_id": "c04_pbkdf2_same_salt_diff_password",
+    "category": "salt_policy",
+    "fake_record": "synthetic_password_case",
+    "context": "salt_policy",
+    "secret_label": "toy_secret_2",
+    "secret_bytes_len": 12,
+    "salt_bytes_len": 16,
+    "algorithm": "pbkdf2_hmac",
+    "hash_name": "sha256",
+    "cost_param": 100000,
+    "expected_digest_obs": "different_password_different_output"
+  },
+  {
+    "case_id": "c05_pbkdf2_algorithm_metadata",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "algorithm": "pbkdf2_hmac",
+    "hash_name": "sha256",
+    "expected_verifier_obs": "algorithm_stored"
+  },
+  {
+    "case_id": "c06_pbkdf2_iteration_metadata",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "algorithm": "pbkdf2_hmac",
+    "cost_param": 100000,
+    "expected_verifier_obs": "iterations_stored"
+  },
+  {
+    "case_id": "c07_pbkdf2_salt_metadata",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "salt_bytes_len": 16,
+    "expected_verifier_obs": "salt_stored"
+  },
+  {
+    "case_id": "c08_pbkdf2_digest_len_metadata",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "algorithm": "pbkdf2_hmac",
+    "expected_digest_obs": "digest_len_stored"
+  },
+  {
+    "case_id": "c09_pbkdf2_verify_success",
+    "category": "kdf_policy",
+    "fake_record": "fake_login_row",
+    "context": "kdf_policy",
+    "secret_label": "toy_secret_1",
+    "algorithm": "pbkdf2_hmac",
+    "cost_param": 100000,
+    "expected_digest_obs": "verify_success",
+    "expected_comparison_obs": "compare_digest_match"
+  },
+  {
+    "case_id": "c10_pbkdf2_verify_wrong",
+    "category": "kdf_policy",
+    "fake_record": "fake_login_row",
+    "context": "kdf_policy",
+    "secret_label": "wrong_secret",
+    "algorithm": "pbkdf2_hmac",
+    "cost_param": 100000,
+    "expected_digest_obs": "verify_fail",
+    "expected_comparison_obs": "compare_digest_mismatch"
+  },
+  {
+    "case_id": "c11_pbkdf2_iteration_changes_output",
+    "category": "kdf_policy",
+    "fake_record": "test_service",
+    "context": "kdf_policy",
+    "algorithm": "pbkdf2_hmac",
+    "cost_param": 200000,
+    "expected_digest_obs": "iterations_change_output"
+  },
+  {
+    "case_id": "c12_pbkdf2_low_iteration_caveat",
+    "category": "kdf_policy",
+    "fake_record": "test_service",
+    "context": "kdf_policy",
+    "algorithm": "pbkdf2_hmac",
+    "cost_param": 1000,
+    "expected_digest_obs": "low_iteration_caveat",
+    "expected_comparison_obs": "policy_warn"
+  },
+  {
+    "case_id": "c13_pbkdf2_sha256_vs_sha512",
+    "category": "kdf_policy",
+    "fake_record": "test_service",
+    "context": "kdf_policy",
+    "algorithm": "pbkdf2_hmac",
+    "hash_name": "sha512",
+    "expected_digest_obs": "hash_name_matters"
+  },
+  {
+    "case_id": "c14_secrets_salt_generation",
+    "category": "salt_policy",
+    "fake_record": "demo_account",
+    "context": "salt_policy",
+    "salt_bytes_len": 16,
+    "expected_salt_obs": "secrets_token_bytes"
+  },
+  {
+    "case_id": "c15_fixed_salt_negative",
+    "category": "salt_policy",
+    "fake_record": "demo_account",
+    "context": "salt_policy",
+    "salt_bytes_len": 16,
+    "expected_salt_obs": "fixed_salt_footgun",
+    "expected_success": false,
+    "naive_should_fail": true
+  },
+  {
+    "case_id": "c16_short_salt_caveat",
+    "category": "salt_policy",
+    "fake_record": "demo_account",
+    "context": "salt_policy",
+    "salt_bytes_len": 4,
+    "expected_salt_obs": "short_salt_caveat"
+  },
+  {
+    "case_id": "c17_salt_uniqueness",
+    "category": "salt_policy",
+    "fake_record": "synthetic_password_case",
+    "context": "salt_policy",
+    "salt_bytes_len": 16,
+    "expected_salt_obs": "salt_unique_in_corpus"
+  },
+  {
+    "case_id": "c18_scrypt_available",
+    "category": "kdf_policy",
+    "fake_record": "sample_verifier",
+    "context": "kdf_policy",
+    "algorithm": "scrypt",
+    "expected_digest_obs": "scrypt_available_or_skip"
+  },
+  {
+    "case_id": "c19_scrypt_unavailable_skip",
+    "category": "kdf_policy",
+    "fake_record": "sample_verifier",
+    "context": "kdf_policy",
+    "algorithm": "scrypt",
+    "expected_success": null,
+    "expected_digest_obs": "scrypt_optional_skip"
+  },
+  {
+    "case_id": "c20_scrypt_parameters",
+    "category": "kdf_policy",
+    "fake_record": "sample_verifier",
+    "context": "kdf_policy",
+    "algorithm": "scrypt",
+    "expected_digest_obs": "scrypt_n_r_p_metadata"
+  },
+  {
+    "case_id": "c21_scrypt_memory_cost",
+    "category": "kdf_policy",
+    "fake_record": "sample_verifier",
+    "context": "kdf_policy",
+    "algorithm": "scrypt",
+    "expected_digest_obs": "scrypt_memory_cost_caveat"
+  },
+  {
+    "case_id": "c22_compare_digest_success",
+    "category": "compare_policy",
+    "fake_record": "fake_login_row",
+    "context": "compare_policy",
+    "expected_comparison_obs": "compare_digest_match"
+  },
+  {
+    "case_id": "c23_compare_digest_failure",
+    "category": "compare_policy",
+    "fake_record": "fake_login_row",
+    "context": "compare_policy",
+    "expected_comparison_obs": "compare_digest_mismatch"
+  },
+  {
+    "case_id": "c24_equality_compare_caveat",
+    "category": "compare_policy",
+    "fake_record": "fake_login_row",
+    "context": "compare_policy",
+    "expected_comparison_obs": "plain_equality_caveat",
+    "naive_should_fail": true
+  },
+  {
+    "case_id": "c25_hex_vs_binary",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "expected_verifier_obs": "hex_vs_binary_caveat"
+  },
+  {
+    "case_id": "c26_base64_verifier",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "expected_verifier_obs": "base64_encoding"
+  },
+  {
+    "case_id": "c27_malformed_verifier",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "expected_success": false,
+    "expected_verifier_obs": "malformed_verifier_parse_error"
+  },
+  {
+    "case_id": "c28_missing_algorithm",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "expected_success": false,
+    "expected_verifier_obs": "missing_algorithm_metadata"
+  },
+  {
+    "case_id": "c29_missing_cost",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "expected_success": false,
+    "expected_verifier_obs": "missing_cost_metadata"
+  },
+  {
+    "case_id": "c30_missing_salt",
+    "category": "verifier_format",
+    "fake_record": "sample_verifier",
+    "context": "verifier_format",
+    "expected_success": false,
+    "expected_verifier_obs": "missing_salt_metadata"
+  },
+  {
+    "case_id": "c31_unicode_utf8",
+    "category": "encoding_caveat",
+    "fake_record": "example_user",
+    "context": "encoding_caveat",
+    "secret_label": "utf8_secret_\u00e9",
+    "secret_bytes_len": 0,
+    "expected_encoding_obs": "utf8_encoding"
+  },
+  {
+    "case_id": "c32_bytes_str_boundary",
+    "category": "encoding_caveat",
+    "fake_record": "example_user",
+    "context": "encoding_caveat",
+    "expected_encoding_obs": "bytes_str_boundary"
+  },
+  {
+    "case_id": "c33_normalization_not_applied",
+    "category": "encoding_caveat",
+    "fake_record": "example_user",
+    "context": "encoding_caveat",
+    "expected_encoding_obs": "normalization_not_silent"
+  },
+  {
+    "case_id": "c34_nul_byte",
+    "category": "encoding_caveat",
+    "fake_record": "example_user",
+    "context": "encoding_caveat",
+    "expected_encoding_obs": "nul_byte_caveat"
+  },
+  {
+    "case_id": "c35_long_input_policy",
+    "category": "input_length_caveat",
+    "fake_record": "toy_secret",
+    "context": "input_length_caveat",
+    "secret_bytes_len": 200,
+    "expected_encoding_obs": "long_input_policy"
+  },
+  {
+    "case_id": "c36_bcrypt_72byte_not_tested",
+    "category": "bcrypt_not_tested",
+    "fake_record": "toy_secret",
+    "context": "bcrypt_not_tested",
+    "secret_bytes_len": 100,
+    "expected_encoding_obs": "bcrypt_72byte_not_tested"
+  },
+  {
+    "case_id": "c37_argon2_not_stdlib",
+    "category": "argon2_not_tested",
+    "fake_record": "test_service",
+    "context": "argon2_not_tested",
+    "expected_digest_obs": "argon2_not_stdlib"
+  },
+  {
+    "case_id": "c38_bcrypt_not_stdlib",
+    "category": "bcrypt_not_tested",
+    "fake_record": "test_service",
+    "context": "bcrypt_not_tested",
+    "expected_digest_obs": "bcrypt_not_stdlib"
+  },
+  {
+    "case_id": "c39_pepper_not_tested",
+    "category": "production_truth_not_tested",
+    "fake_record": "demo_account",
+    "context": "production_truth_not_tested",
+    "expected_digest_obs": "pepper_not_tested"
+  },
+  {
+    "case_id": "c40_password_cache_key_smell",
+    "category": "cache_key_caveat",
+    "fake_record": "fake_login_row",
+    "context": "cache_key_caveat",
+    "expected_digest_obs": "password_cache_key_smell",
+    "naive_should_fail": true
+  },
+  {
+    "case_id": "c41_hmac_domain_separation",
+    "category": "hmac_caveat",
+    "fake_record": "test_service",
+    "context": "hmac_caveat",
+    "expected_digest_obs": "hmac_domain_separation"
+  },
+  {
+    "case_id": "c42_hmac_key_not_salt",
+    "category": "hmac_caveat",
+    "fake_record": "test_service",
+    "context": "hmac_caveat",
+    "expected_digest_obs": "hmac_key_not_salt"
+  },
+  {
+    "case_id": "c43_secrets_vs_random",
+    "category": "secrets_policy",
+    "fake_record": "demo_account",
+    "context": "secrets_policy",
+    "expected_salt_obs": "secrets_not_random"
+  },
+  {
+    "case_id": "c44_deterministic_salt_test",
+    "category": "secrets_policy",
+    "fake_record": "demo_account",
+    "context": "secrets_policy",
+    "expected_salt_obs": "deterministic_test_salt"
+  },
+  {
+    "case_id": "c45_timing_not_proof",
+    "category": "production_truth_not_tested",
+    "fake_record": "test_service",
+    "context": "production_truth_not_tested",
+    "expected_comparison_obs": "timing_not_security_proof"
+  },
+  {
+    "case_id": "c46_password_strength_not_tested",
+    "category": "production_truth_not_tested",
+    "fake_record": "example_user",
+    "context": "production_truth_not_tested",
+    "expected_digest_obs": "password_strength_not_tested"
+  },
+  {
+    "case_id": "c47_breach_resistance_not_tested",
+    "category": "production_truth_not_tested",
+    "fake_record": "example_user",
+    "context": "production_truth_not_tested",
+    "expected_digest_obs": "breach_resistance_not_tested"
+  },
+  {
+    "case_id": "c48_rate_limiting_not_tested",
+    "category": "production_truth_not_tested",
+    "fake_record": "fictional_admin",
+    "context": "production_truth_not_tested",
+    "expected_digest_obs": "rate_limiting_not_tested"
+  },
+  {
+    "case_id": "c49_database_storage_not_tested",
+    "category": "production_truth_not_tested",
+    "fake_record": "demo_account",
+    "context": "production_truth_not_tested",
+    "expected_digest_obs": "database_storage_not_tested"
+  },
+  {
+    "case_id": "c50_production_auth_not_tested",
+    "category": "production_truth_not_tested",
+    "fake_record": "fictional_admin",
+    "context": "production_truth_not_tested",
+    "expected_digest_obs": "production_auth_not_tested"
+  }
+]

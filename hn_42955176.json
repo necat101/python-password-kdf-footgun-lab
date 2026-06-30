@@ -1,0 +1,333 @@
+{
+  "story": {
+    "by": "n0rdy",
+    "descendants": 166,
+    "id": 42955176,
+    "kids": [
+      42955527,
+      42957306,
+      42963864,
+      42959745,
+      42959566,
+      42984463,
+      42957622,
+      42955448,
+      42955554,
+      42964108,
+      42955581,
+      42957204,
+      42955826,
+      42965628,
+      42959868,
+      42962907,
+      42956159,
+      42957626,
+      42957355,
+      42961101,
+      42962917,
+      42961432,
+      42960790,
+      42960594,
+      42959201,
+      42955573
+    ],
+    "score": 377,
+    "time": 1738789825,
+    "title": "Okta Bcrypt incident lessons for designing better APIs",
+    "type": "story",
+    "url": "https://n0rdy.foo/posts/20250121/okta-bcrypt-lessons-for-better-apis/"
+  },
+  "comments": [
+    {
+      "by": "tptacek",
+      "id": 42955527,
+      "kids": [
+        42955861,
+        42957300,
+        42955709,
+        42960267,
+        42959763,
+        42960508,
+        42956119,
+        42964743
+      ],
+      "parent": 42955176,
+      "text": "Bcrypt is a password hash, not a KDF, which is the way it was used in this API. It&#x27;s super unclear to me why they wanted a string-based KDF here at all; does anyone have more context?<p>I&#x27;ve in the past been annoying about saying I think we should just call all password hashes &quot;KDFs&quot;, but here&#x27;s a really good illustration of why I was definitely wrong about that. A KDF is a generally-useful bit of cryptography joinery; a password hash has <i>exactly one job</i>.",
+      "time": 1738791354,
+      "type": "comment"
+    },
+    {
+      "by": "jhhh",
+      "id": 42957306,
+      "kids": [
+        42958355,
+        42958024,
+        42957688,
+        42965010
+      ],
+      "parent": 42955176,
+      "text": "I can see the incident was a jumping off point to talk about bad APIs (bcrypt probably should error &gt;72) but it sounds like the actual bug was they weren&#x27;t checking the value in the cache matched the data they used in the hash for the key. The authentication cache check should survive any arbitrarily bad hashing algorithm because all of them are going to have collisions (pigeonhole principal). Even an arbitrarily &#x27;strong&#x27; hash function with no input truncation, as long as it has a fixed width result, will have this property. Thus, any arguing in the comments here about different hash functions with different truncation properties is moot.<p>The analogy is something like creating a hash map whose insert function computes the slot for the key and <i>unconditionally</i> puts the value there instead of checking if the keys are the same during a collision. No amount of tinkering with the hash function fixes this problem. The algorithm is wrong. A hashmap should survive and be <i>correct</i> even giving it a hash function that always returns 4.",
+      "time": 1738800965,
+      "type": "comment"
+    },
+    {
+      "by": "nfriedly",
+      "id": 42963864,
+      "kids": [
+        42964431
+      ],
+      "parent": 42955176,
+      "text": "I strongly agree with the conclusion that the libraries should reject input they can&#x27;t correctly handle instead of silently truncating it.<p>I co-maintain a rate-limiting library that had some similar rough edges, where it wouldn&#x27;t always be obvious that you were doing it wrong. (For example: limiting the IP of your reverse proxy rather than the end user, or the inverse: blindly accepting any X-Forwarded-For header, including those potentially set by a malicious user.) A couple years back, I spent some time adding in runtime checks that detect those kinds of issues and log a warning. Since then, we&#x27;ve had a significant reduction in the amount of not-a-bug reports and, I assume, significantly fewer users with incorrect configurations.",
+      "time": 1738858691,
+      "type": "comment"
+    },
+    {
+      "by": "sandeepkd",
+      "id": 42959745,
+      "kids": [
+        42970029,
+        42962091
+      ],
+      "parent": 42955176,
+      "text": "I enjoyed the article and the detailed analysis for different languages. The conclusion is probably the part where most of the disagreement lies. API design is is not really at fault here if we consider the purpose of the API and the intended output.<p>The API was designed to generate a hash for a password (knowledge factor) and for performance and practical reasons a limit has been picked up (72). The chances that some one knows your first 72 characters of password implies that the probably is a lot higher for the abuser to have remaining characters too.<p>While smaller mistake here in my opinion was not knowing the full implementation details of a library, the bigger mistake was trying to use the library to generate hash of publicly available&#x2F;visible information",
+      "time": 1738824393,
+      "type": "comment"
+    },
+    {
+      "by": "renewiltord",
+      "id": 42959566,
+      "kids": [
+        42960249
+      ],
+      "parent": 42955176,
+      "text": "This is a completely unreasonable API. It reminds me of the `mysql_real_escape_string` vs. `mysql_escape_string`. The default API must be the strict one. You should be able to configure it to be broken but silent truncation is an insane piece of functionality. There is no universe in which this is logical. One might as well just have everything return void* and then put in the documentation what type to cast to. The invariant is clearly a historical accident.<p>As a mistake, it&#x27;s fine. Everyone writes up things like that. But defending it as an affirmatively good decision is wild.",
+      "time": 1738822310,
+      "type": "comment"
+    },
+    {
+      "by": "veqq",
+      "id": 42984463,
+      "parent": 42955176,
+      "text": "[u&#x2F;forgot-CLHS](<a href=\"https:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;lisp&#x2F;comments&#x2F;1ikrz1g&#x2F;shout_out_to_common_lisps_ironclad&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;lisp&#x2F;comments&#x2F;1ikrz1g&#x2F;shout_out_to_...</a>) notes that Common Lisp&#x27;s defact standard cryptography library Ironclad&#x27;s [implementation](<a href=\"https:&#x2F;&#x2F;github.com&#x2F;sharplispers&#x2F;ironclad&#x2F;blob&#x2F;master&#x2F;src&#x2F;kdf&#x2F;bcrypt.lisp\">https:&#x2F;&#x2F;github.com&#x2F;sharplispers&#x2F;ironclad&#x2F;blob&#x2F;master&#x2F;src&#x2F;kdf...</a>) avoids such problems!<p>```\n(defmethod derive-key ((kdf bcrypt) passphrase salt iteration-count key-length)\n  (declare (type (simple-array (unsigned-byte 8) (*)) passphrase salt))\n  (unless (&lt;= (length passphrase) 72)\n    (error &#x27;ironclad-error\n           :format-control &quot;PASSPHRASE must be at most 72 bytes long.&quot;))...)\n```",
+      "time": 1739035543,
+      "type": "comment"
+    },
+    {
+      "by": "ww520",
+      "id": 42957622,
+      "kids": [
+        42957878
+      ],
+      "parent": 42955176,
+      "text": "Have they did a bcrypt(password + userId + username), it won&#x27;t be so bad. Order of entropy is important.<p>Also I&#x27;m not sure what functionality the authentication cache provides, but their use of bcrypt(userId + username + password) implies the password is kept around somewhere, which is not the best practice.<p>OT. Has Argon2 basically overtaken Bcrypt in password hashing in recent years?",
+      "time": 1738803539,
+      "type": "comment"
+    },
+    {
+      "by": "jedisct1",
+      "id": 42955448,
+      "kids": [
+        42955552,
+        42955669,
+        42955690
+      ],
+      "parent": 42955176,
+      "text": "The bcrypt implementation in the Zig standard library has both the bcrypt() function (where truncation is explicitly documented) and the bcryptWithoutTruncation() function (which is recommended and automatically pre-hashes long passwords).",
+      "time": 1738791018,
+      "type": "comment"
+    },
+    {
+      "by": "coolgoose",
+      "id": 42955554,
+      "kids": [
+        42955603,
+        42960657,
+        42955637
+      ],
+      "parent": 42955176,
+      "text": "I am curious why bcrypt was used for hashing in the first place and not something like sha-512<p>Is there a reason I might be missing?",
+      "time": 1738791469,
+      "type": "comment"
+    },
+    {
+      "by": "thekemkid",
+      "id": 42964108,
+      "parent": 42955176,
+      "text": "In Node, you would commonly reach for the builtin core &quot;node:crypto&quot; module to run cryptographic functionality like this. I wondered why that wasn&#x27;t used here, but bcryptjs was. After digging into it a little, node doesn&#x27;t ship with core support for bcrypt, because it&#x27;s not supported by OpenSSL.<p>The node crypto module is essentially an API that offloads crypto work to OpenSSL. If we dig into OpenSSL, they won&#x27;t support bcrypt. Bcrypt won&#x27;t be supported by OpenSSL because of reasons to do with standardisation. <a href=\"https:&#x2F;&#x2F;github.com&#x2F;openssl&#x2F;openssl&#x2F;issues&#x2F;5323\">https:&#x2F;&#x2F;github.com&#x2F;openssl&#x2F;openssl&#x2F;issues&#x2F;5323</a><p>Since bcrypt is not a &quot;standardised&quot; algorithm, it makes me wonder why Okta used it, at all?<p>I remember in uni studying cryptography for application development and even then, back in 2013, it was used and recommended, but not standardised. it says a lot that 12 years on it still hasn&#x27;t been.",
+      "time": 1738860165,
+      "type": "comment"
+    },
+    {
+      "by": "whalesalad",
+      "id": 42955581,
+      "parent": 42955176,
+      "text": "damn that sounds like a rookie mistake for an organization who is literally in the business of secure auth",
+      "time": 1738791609,
+      "type": "comment"
+    },
+    {
+      "by": "progmetaldev",
+      "id": 42957204,
+      "kids": [
+        42958562,
+        42959994,
+        42957374
+      ],
+      "parent": 42955176,
+      "text": "Reminds me of when I saw a junior developer calling SHA-1 on an incrementing integer ID, with no salt. We had a long talk about it, he thought it was too &quot;scrambled&quot; to allow anyone to recognize what was being done. He shouldn&#x27;t have been so junior, he was 4 or 5 years into his career. I had to be the bad guy and override his decision without further discussing why it was a bad idea, and I really tried for a good 45 minutes to explain things. He got it a week later when I showed him rainbow tables, and I felt bad having to tell him to just do what I said for the solution, but sometimes you just have to make the decision to say &quot;do what I said, I&#x27;m sorry you don&#x27;t understand, I tried to explain.&quot;",
+      "time": 1738800245,
+      "type": "comment"
+    },
+    {
+      "by": "Tostino",
+      "id": 42955826,
+      "kids": [
+        42958744,
+        42955863,
+        42957553,
+        42956333
+      ],
+      "parent": 42955176,
+      "text": "That is such a rookie mistake. It&#x27;s not some hidden information that bcrypt has a 72 char limit. Pretty widely documented in multiple implementations and languages.<p>How does a company whose only job is security screw that up so badly?",
+      "time": 1738792596,
+      "type": "comment"
+    },
+    {
+      "by": "jmuguy",
+      "id": 42965628,
+      "parent": 42955176,
+      "text": "I was curious how bcrypt-ruby would handle this.  It does not throw an error for input length larger than 72.  However the actual API for the gem makes it pretty clear its for hashing a password, and not just hashing in general - as you can see from the code.<p><a href=\"https:&#x2F;&#x2F;gist.github.com&#x2F;neontuna&#x2F;dffd0452d09a0861106c0a46669a3ff0\" rel=\"nofollow\">https:&#x2F;&#x2F;gist.github.com&#x2F;neontuna&#x2F;dffd0452d09a0861106c0a46669...</a>",
+      "time": 1738870057,
+      "type": "comment"
+    },
+    {
+      "by": "underdeserver",
+      "id": 42959868,
+      "kids": [
+        42960190,
+        42960005
+      ],
+      "parent": 42955176,
+      "text": "Hold on, in the Rust example, how does `err_on_truncation` get set? TFA completely ignored that there&#x27;s a setting somewhere (probably incorrectly defaulting to false)",
+      "time": 1738825574,
+      "type": "comment"
+    },
+    {
+      "by": "mariocesar",
+      "id": 42962907,
+      "kids": [
+        42962985
+      ],
+      "parent": 42955176,
+      "text": "I&#x27;m confused, it seems that the OP wants to use Bcrypt as an encoding&#x2F;decoding utility.<p>About solutions, Django hashes by default the password only with a salt. I&#x27;m not sure why it would be valuable to combine user_id+username+password. I&#x27;ve always assumed that using salt+password was the best practice.",
+      "time": 1738853539,
+      "type": "comment"
+    },
+    {
+      "by": "sscarduzio",
+      "id": 42956159,
+      "kids": [
+        42960067
+      ],
+      "parent": 42955176,
+      "text": "what I would have naturally done without anticipating any flaw (and probably be just OK):<p><pre><code>   cache_key = sha(sha(id + username) + bcrypt(pass))\n</code></pre>\nwith sha256 or something.",
+      "time": 1738794224,
+      "type": "comment"
+    },
+    {
+      "by": "SebFender",
+      "id": 42957626,
+      "parent": 42955176,
+      "text": "I&#x27;ve seen this multiple times - even better I don&#x27;t know how many ways we found a simple workaround or bypass of the complete process in so many apps... In essence this has nothing to do with the API itself but the way in which is another ballgame altogether. Great post though.",
+      "time": 1738803570,
+      "type": "comment"
+    },
+    {
+      "by": "bawolff",
+      "id": 42957355,
+      "kids": [
+        42957648
+      ],
+      "parent": 42955176,
+      "text": "&gt; On the other hand, such long usernames are not very usual, which I agree with<p>Weird take. Usernames are often chosen by the user. Less so in corporate world but definitely not unheard of",
+      "time": 1738801249,
+      "type": "comment"
+    },
+    {
+      "by": "Lvl999Noob",
+      "id": 42961101,
+      "kids": [
+        42961153,
+        42961155
+      ],
+      "parent": 42955176,
+      "text": "Can someone explain, in clear layman terms, what the difference is between a password hash and a KDF? I have went through this whole thread and tried to look around online but I still don&#x27;t understand.",
+      "time": 1738838879,
+      "type": "comment"
+    },
+    {
+      "by": "zero_k",
+      "id": 42962917,
+      "kids": [
+        42981817
+      ],
+      "parent": 42955176,
+      "text": "Another incident at Okta? Oh no! Its security has _always_ been a mess. It&#x27;s a dumpster fire and no client of their cares because their identity systems are so messed up, that it&#x27;s better to have the mess of Okta, than the mess they are sitting on. It&#x27;s kinda crazy they get away with such incredibly bad security practices. Like... this bcrypt issue has been know for a LONG while. We used to test for it 8-10 years ago.<p>There&#x27;s either (1) nobody competent enough there to know (which is likely not true, I had a pentester friend recently join, and she is very good), or, more likely (2) management doesn&#x27;t care and&#x2F;or doesn&#x27;t give enough authority to IT security personnel.<p>As long as clients don&#x27;t have any better options, Okta will stay this way.",
+      "time": 1738853625,
+      "type": "comment"
+    },
+    {
+      "by": "withinboredom",
+      "id": 42961432,
+      "kids": [
+        42967526
+      ],
+      "parent": 42955176,
+      "text": "I&#x27;m really surprised they didn&#x27;t cover PHP since (almost?) every framework uses bcrypt in php these days.",
+      "time": 1738842079,
+      "type": "comment"
+    },
+    {
+      "by": "philippta",
+      "id": 42960790,
+      "kids": [
+        42960863,
+        42960827
+      ],
+      "parent": 42955176,
+      "text": "What&#x27;s the reason behind bcrypt(userId + username + password) rather than just bcrypt(password) ?",
+      "time": 1738835570,
+      "type": "comment"
+    },
+    {
+      "by": "llmthrow102",
+      "id": 42960594,
+      "parent": 42955176,
+      "text": "How does anyone take Okta seriously after this incident btw?",
+      "time": 1738833678,
+      "type": "comment"
+    },
+    {
+      "by": "throwaway984393",
+      "dead": true,
+      "id": 42959201,
+      "parent": 42955176,
+      "text": "[dead]",
+      "time": 1738817368,
+      "type": "comment"
+    },
+    {
+      "by": "nabla9",
+      "id": 42955573,
+      "kids": [
+        42957384,
+        42962036,
+        42957359
+      ],
+      "parent": 42955176,
+      "text": "&gt; was used to generate the cache key where we hash a combined string of userId + username + password.<p>Don&#x27;t conceive your own cryptographic hacks. Use existing KDF designed by professionals.",
+      "time": 1738791564,
+      "type": "comment"
+    }
+  ]
+}
