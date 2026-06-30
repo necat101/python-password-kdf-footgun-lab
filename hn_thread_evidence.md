@@ -10,4 +10,5 @@ Accessed via Hacker News Firebase API CLI before writing README.md.
 
 Raw API dump: `hn_42955176.json`
 
-The README.md sentiment summary is based on the actual comment text from this API response, not on web search summaries, the linked article alone, or Python documentation.
+The README.md sentiment summary is based on the actual comment text from this API response, not
+on web search summaries, the linked article alone, or Python documentation.

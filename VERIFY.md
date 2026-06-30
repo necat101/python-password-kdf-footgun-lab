@@ -42,5 +42,7 @@ Environment:
 - External crypto/password libraries: none
 - Password cracking tools: none
 
-The naive unsalted fast hash marker failing 9/50 cases is expected – unsalted SHA256, repeated fast hash, fixed salt, equality comparison, malformed verifier, missing metadata, password cache key smell all break naive assumptions.
+The naive unsalted fast hash marker failing 9/50 cases is expected – unsalted SHA256, repeated
+fast hash, fixed salt, equality comparison, malformed verifier, missing metadata, password
+cache key smell all break naive assumptions.
 ```
